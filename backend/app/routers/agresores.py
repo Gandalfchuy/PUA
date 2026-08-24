@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from geoalchemy2.elements import WKTElement
-
+from typing import List 
 from app.database import get_db
 from app.models.agresores import Agresor
 from app.models.catalogos import Adiccion, TipoViolencia, SectorSocial, ActividadRecreativa, GeneroMusical, TipoRelacion
@@ -105,6 +105,13 @@ def obtener_agresor(folio: int, db: Session = Depends(get_db), usuario_id: int =
         raise HTTPException(status_code=404, detail="Agresor no encontrado")
         
     return agresor_db
+
+
+@router_agresor.get("/", response_model=List[AgresorResponse])
+def obtener_agresores(db: Session = Depends(get_db), usuario_id: int = Depends(obtener_usuario_actual)):
+    agresores_db = db.query(Agresor).filter(Agresor.is_deleted == False).all()
+    
+    return agresores_db
 
 
 

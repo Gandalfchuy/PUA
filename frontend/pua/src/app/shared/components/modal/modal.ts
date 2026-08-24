@@ -1,5 +1,6 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-modal',
@@ -10,14 +11,16 @@ import { CommonModule } from '@angular/common';
 export class ModalComponent {
   // Entradas dinámicas para controlar el contenido
   @Input() mostrar = false;
-  @Input() tipo: 'exito' | 'error' = 'error';
+  @Input() tipo:  'acceso_autorizado' | 'exito' | 'error' = 'error';
   @Input() titulo = '';
   @Input() mensaje = '';
-
-  // Evento para avisar al padre que el botón "Entendido" fue presionado
   @Output() alCerrar = new EventEmitter<void>();
+  private router = inject(Router)
 
   cerrar() {
+    if (this.tipo === 'acceso_autorizado') {
+      this.router.navigate(['/agresores']);
+    }
     this.alCerrar.emit();
   }
 }

@@ -1,1 +1,16 @@
-<router-outlet></router-outlet>
+@if (mostrarSidebar()) {
+  <!-- Cambiamos a un flex contenedor que ocupa toda la pantalla sin scroll general -->
+  <div class="h-screen bg-slate-50 flex overflow-hidden">
+    
+    <!-- El Sidebar ocupa su ancho y empuja al contenido -->
+    <app-sidebar class="flex-shrink: 0"></app-sidebar>
+    
+    <!-- El contenido principal toma el resto del espacio y tiene su propio scroll -->
+    <main class="flex-1 overflow-y-auto">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+} @else {
+  <router-outlet></router-outlet>
+}

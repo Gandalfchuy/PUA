@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from geoalchemy2.elements import WKTElement
-
+from typing import List 
 from app.database import get_db
 from app.models.procesos import ProcesoReeducacion
 from app.schemas.procesos import ProcesoReeducacionResponse, ProcesoReeducacionCreate
@@ -26,9 +26,9 @@ def crear_proceso(datos:ProcesoReeducacionCreate, db:Session = Depends(get_db), 
     return nuevo_proceso
 
 @router_proceso.put("/{folio}", response_model=ProcesoReeducacionResponse)
-def actualizar_proceso(grupo_id: int, datos: ProcesoReeducacionCreate, db: Session = Depends(get_db), usuario_id: int = Depends(obtener_usuario_actual)):
+def actualizar_proceso(folio: int, datos: ProcesoReeducacionCreate, db: Session = Depends(get_db), usuario_id: int = Depends(obtener_usuario_actual)):
 
-    proceso_db = db.query(ProcesoReeducacion).filter(ProcesoReeducacion.folio == grupo_id, ProcesoReeducacion.is_deleted == False).first()
+    proceso_db = db.query(ProcesoReeducacion).filter(ProcesoReeducacion.folio == folio, ProcesoReeducacion.is_deleted == False).first()
     
     if not proceso_db:
         raise HTTPException(
@@ -48,6 +48,23 @@ def actualizar_proceso(grupo_id: int, datos: ProcesoReeducacionCreate, db: Sessi
     db.refresh(proceso_db)
 
     return proceso_db
+
+@router_proceso.get("/{folio}", response_model=List[ProcesoReeducacionResponse])
+def obtener_proceso_por_folio(
+    folio: int, 
+    db: Session = Depends(get_db), 
+    usuario_id: int = Depends(obtener_usuario_actual)
+):
+    agresor = db.query(ProcesoReeducacion).filter(
+        ProcesoReeducacion.folio == folio, 
+        ProcesoReeducacion.is_deleted == False
+    ).first()
+    
+    if not agresor:
+        raise HTTPException(status_code=404, detail="Agresor no encontrado")
+        
+    return agresor
+
 
 @router_proceso.delete("/{folio}", status_code=status.HTTP_204_NO_CONTENT)
 def borrar_proceso(folio: int, db: Session = Depends(get_db), usuario_id: int = Depends(requiere_admin)):

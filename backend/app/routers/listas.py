@@ -26,40 +26,10 @@ def crear_asistencia(datos:ListaCreate, db:Session = Depends(get_db), usuario_id
 
     return nueva_asistencia
 
-@router_lista.get("/grupos/{id_grupo}/lista", response_model=List[ListaResponse])
-def obtener_listas_por_grupo_y_fecha(
-    id_grupo: int, 
-    fecha_exacta: Optional[date] = Query(None, description="Día específico YYYY-MM-DD"),
-    mes: Optional[int] = Query(None, ge=1, le=12, description="Mes numérico (1-12)"),
-    anio: Optional[int] = Query(None, description="Año (ej. 2026)"),
-    db: Session = Depends(get_db),
-    usuario_actual = Depends(obtener_usuario_actual)
-):
-    consulta = db.query(Lista).filter(Lista.grupo_id == id_grupo)
-                 
-
-    if fecha_exacta:
-        consulta = consulta.filter(Lista.fecha == fecha_exacta)
-        
-    elif mes and anio:
-        consulta = consulta.filter(
-            extract('month', Lista.fecha) == mes,
-            extract('year', Lista.fecha) == anio
-        )
-        
-    elif mes and not anio:
-        consulta = consulta.filter(
-            extract('month', Lista.fecha) == mes,
-            extract('year', Lista.fecha) == date.today().year
-        )
-
-    resultados = consulta.all()
+@router_lista.get("/", response_model=List[ListaResponse])
+def listar_lista(db: Session = Depends(get_db), usuario_id: int = Depends(obtener_usuario_actual)):
     
-    if not resultados:
-        raise HTTPException(
-            status_code=404, 
-            detail=f"No se encontraron listas para el grupo {id_grupo} en la fecha especificada."
-        )
-
-    return resultados
+    sesion_db = db.query(Lista).filter(Lista.is_deleted == False).all()
+    
+    return sesion_db
 

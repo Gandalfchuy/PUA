@@ -1,0 +1,512 @@
+<div class="min-h-screen bg-slate-50 p-6 lg:p-10">
+    <div class="max-w-7xl mx-auto">
+
+        @if (!mostrandoFormulario) {
+        <div class="space-y-8">
+            <div class="border-b border-slate-200 pb-5 flex justify-between items-end">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Directorio de Agresores</h1>
+                    <p class="mt-2 text-sm text-slate-500">Gestión centralizada de expedientes, perfiles y
+                        georreferenciación.</p>
+                </div>
+                <button (click)="abrirNuevo()"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-colors flex items-center">
+                    <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Registrar Agresor
+                </button>
+            </div>
+
+            <div class="relative w-full sm:max-w-md">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <input type="text" (input)="alEscribirBusqueda($any($event.target).value)"
+                    placeholder="Buscar por Nombre, Apellidos o CURP..."
+                    class="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-600 outline-none" />
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
+                @if (cargando) {
+                <div class="absolute inset-0 bg-white/60 z-10 flex items-center justify-center backdrop-blur-sm">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                </div>
+                }
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">CURP</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Nombre
+                                    Completo</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Edad</th>
+                                <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Acciones
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200">
+                            @for (item of datosPaginados; track getId(item)) {
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-6 py-4 text-sm font-mono text-slate-600">{{ item.curp }}</td>
+                                <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ item.nombre }} {{
+                                    item.apellido_paterno }} {{ item.apellido_materno }}</td>
+                                <td class="px-6 py-4 text-sm text-slate-600">{{ item.edad }} años</td>
+                                <td class="px-6 py-4 text-right text-sm font-medium space-x-3">
+                                    <button (click)="editar(item)" class="text-indigo-600 hover:text-indigo-900">Editar
+                                        Perfil</button>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <app-paginacion [totalRegistros]="datosFiltrados.length" [elementosPorPagina]="elementosPorPagina"
+                        [paginaActual]="paginaActual" (cambioDePagina)="cambiarPagina($event)"></app-paginacion>
+                </div>
+            </div>
+        </div>
+        }
+
+        @else {
+        <div class="flex flex-col lg:flex-row gap-8">
+
+            <div class="lg:w-64 shrink-0">
+                <div class="sticky top-8 bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-3">Secciones del Perfil
+                    </h3>
+                    <nav class="space-y-1">
+                        <button type="button" (click)="cambiarPestana(1)" [class.bg-sky-50]="pestanaActual === 1"
+                            [class.text-sky-700]="pestanaActual === 1"
+                            class="w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+                            <span class="w-6 h-6 rounded-full flex items-center justify-center mr-3 text-xs"
+                                [class.bg-sky-100]="pestanaActual === 1"
+                                [class.bg-slate-100]="pestanaActual !== 1">1</span> Datos Generales
+                        </button>
+                        <button type="button" (click)="cambiarPestana(2)" [class.bg-sky-50]="pestanaActual === 2"
+                            [class.text-sky-700]="pestanaActual === 2"
+                            class="w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+                            <span class="w-6 h-6 rounded-full flex items-center justify-center mr-3 text-xs"
+                                [class.bg-sky-100]="pestanaActual === 2"
+                                [class.bg-slate-100]="pestanaActual !== 2">2</span> Ubicaciones
+                        </button>
+                        <button type="button" (click)="cambiarPestana(3)" [class.bg-sky-50]="pestanaActual === 3"
+                            [class.text-sky-700]="pestanaActual === 3"
+                            class="w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+                            <span class="w-6 h-6 rounded-full flex items-center justify-center mr-3 text-xs"
+                                [class.bg-sky-100]="pestanaActual === 3"
+                                [class.bg-slate-100]="pestanaActual !== 3">3</span> Entorno Familiar
+                        </button>
+                        <button type="button" (click)="cambiarPestana(4)" [class.bg-sky-50]="pestanaActual === 4"
+                            [class.text-sky-700]="pestanaActual === 4"
+                            class="w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+                            <span class="w-6 h-6 rounded-full flex items-center justify-center mr-3 text-xs"
+                                [class.bg-sky-100]="pestanaActual === 4"
+                                [class.bg-slate-100]="pestanaActual !== 4">4</span> Socioeconómico
+                        </button>
+                        <button type="button" (click)="cambiarPestana(5)" [class.bg-sky-50]="pestanaActual === 5"
+                            [class.text-sky-700]="pestanaActual === 5"
+                            class="w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+                            <span class="w-6 h-6 rounded-full flex items-center justify-center mr-3 text-xs"
+                                [class.bg-sky-100]="pestanaActual === 5"
+                                [class.bg-slate-100]="pestanaActual !== 5">5</span> Psicosocial
+                        </button>
+
+                        @if (modoEdicion) {
+                        <div class="pt-4 mt-4 border-t border-slate-200">
+                            <button type="button" (click)="cambiarPestana(6)" [class.bg-sky-50]="pestanaActual === 6"
+                                [class.text-sky-700]="pestanaActual === 6"
+                                class="w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+                                <span
+                                    class="w-6 h-6 rounded-full flex items-center justify-center mr-3 text-xs border border-slate-200"
+                                    [class.bg-sky-100]="pestanaActual === 6"
+                                    [class.bg-white]="pestanaActual !== 6">6</span> Expediente Legal
+                            </button>
+                        </div>
+                        }
+                    </nav>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative pb-24">
+                <form [formGroup]="formulario" (ngSubmit)="guardar()">
+
+                    <div class="p-6 sm:p-8">
+                        <div [class.hidden]="pestanaActual !== 1" class="space-y-6">
+                            <h2 class="text-xl font-bold text-slate-800 border-b pb-2 mb-6">1. Identidad del Agresor
+                            </h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">CURP *</label>
+                                    <input type="text" formControlName="curp"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg uppercase outline-none focus:ring-2 focus:ring-sky-600"
+                                        placeholder="18 caracteres">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nombre(s) *</label>
+                                    <input type="text" formControlName="nombre"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Edad *</label>
+                                    <input type="number" formControlName="edad"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Apellido Paterno
+                                        *</label>
+                                    <input type="text" formControlName="apellido_paterno"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Apellido Materno
+                                        *</label>
+                                    <input type="text" formControlName="apellido_materno"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div [class.hidden]="pestanaActual !== 2" class="space-y-8">
+                            <h2 class="text-xl font-bold text-slate-800 border-b pb-2 mb-6">2. Georreferenciación
+                                (PostGIS)</h2>
+
+                            <div formGroupName="lugar_nacimiento"
+                                class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                                <label class="block text-sm font-bold text-slate-800 mb-3">📍 Lugar de
+                                    Nacimiento</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="number" step="any" formControlName="latitud"
+                                        (paste)="pegarDesdeGoogleMaps($event,'lugar_nacimiento')"
+                                        placeholder="Latitud (Ej. 18.8106)"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                    <input type="number" step="any" formControlName="longitud"
+                                        placeholder="Longitud (Ej. -98.935)"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                </div>
+                            </div>
+
+                            <div formGroupName="lugar_residencia"
+                                class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                                <label class="block text-sm font-bold text-slate-800 mb-3">🏠 Lugar de Residencia
+                                    Actual</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="number" step="any" formControlName="latitud"
+                                        class="w-full pl-12 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-600 outline-none transition-colors disabled:opacity-50 disabled:bg-slate-50"
+                                        placeholder="18.7831" (paste)="pegarDesdeGoogleMaps($event,'lugar_residencia')">
+                                    <input type="number" step="any" formControlName="longitud"
+                                        class="w-full pl-12 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-600 outline-none transition-colors disabled:opacity-50 disabled:bg-slate-50"
+                                        placeholder="-99.2312">
+                                </div>
+                            </div>
+
+                            <div formGroupName="lugar_trabajo"
+                                class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                                <label class="block text-sm font-bold text-slate-800 mb-3">💼 Lugar de Trabajo</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="number" step="any" formControlName="latitud" placeholder="Latitud"
+                                        (paste)="pegarDesdeGoogleMaps($event,'lugar_trabajo')"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                    <input type="number" step="any" formControlName="longitud" placeholder="Longitud"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div [class.hidden]="pestanaActual !== 3" class="space-y-6">
+                            <h2 class="text-xl font-bold text-slate-800 border-b pb-2 mb-6">3. Estructura Familiar
+                                Primaria</h2>
+
+                            <div
+                                class="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Parejas Previas</label>
+                                    <input type="number" formControlName="parejas_previas"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Núm. de Hijos</label>
+                                    <input type="number" formControlName="hijos"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Núm. de
+                                        Hermanos</label>
+                                    <input type="number" formControlName="hermanos"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Estado Civil</label>
+                                    <select formControlName="estado_civil_id"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                        <option [ngValue]="null">Selecciona...</option>
+                                        @for (cat of catalogos.estadoCivil; track cat.id) { <option [value]="cat.id">{{
+                                            cat.nombre }}</option> }
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Relación con
+                                        Hijos</label>
+                                    <select formControlName="relacion_hijos_id"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                        <option [ngValue]="null">Selecciona...</option>
+                                        @for (cat of catalogos.relacionHijos; track cat.id) { <option [value]="cat.id">
+                                            {{ cat.nombre }}</option> }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Relación Padre
+                                        (Multi)</label>
+                                    <select multiple formControlName="relacion_padre_ids"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg h-32 outline-none focus:ring-2 focus:ring-sky-600 text-sm">
+                                        @for (cat of catalogos.tipoRelacion; track cat.id) { <option [value]="cat.id">{{
+                                            cat.nombre }}</option> }
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Relación Madre
+                                        (Multi)</label>
+                                    <select multiple formControlName="relacion_madre_ids"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg h-32 outline-none focus:ring-2 focus:ring-sky-600 text-sm">
+                                        @for (cat of catalogos.tipoRelacion; track cat.id) { <option [value]="cat.id">{{
+                                            cat.nombre }}</option> }
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Relación Hermanos
+                                        (Multi)</label>
+                                    <select multiple formControlName="relacion_hermanos_ids"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg h-32 outline-none focus:ring-2 focus:ring-sky-600 text-sm">
+                                        @for (cat of catalogos.tipoRelacion; track cat.id) { <option [value]="cat.id">{{
+                                            cat.nombre }}</option> }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div [class.hidden]="pestanaActual !== 4" class="space-y-6">
+                            <h2 class="text-xl font-bold text-slate-800 border-b pb-2 mb-6">4. Perfil Socioeconómico y
+                                Cultural</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nivel Académico</label>
+                                    <select formControlName="situacion_academica_id"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                        <option [ngValue]="null">Selecciona...</option>
+                                        @for (cat of catalogos.situacionAcademica; track cat.id) { <option
+                                            [value]="cat.id">{{ cat.nombre }}</option> }
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Situación
+                                        Laboral</label>
+                                    <select formControlName="situacion_laboral_id"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                        <option [ngValue]="null">Selecciona...</option>
+                                        @for (cat of catalogos.situacionLaboral; track cat.id) { <option
+                                            [value]="cat.id">{{ cat.nombre }}</option> }
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Vivienda</label>
+                                    <select formControlName="situacion_vivienda_id"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                        <option [ngValue]="null">Selecciona...</option>
+                                        @for (cat of catalogos.situacionVivienda; track cat.id) { <option
+                                            [value]="cat.id">{{ cat.nombre }}</option> }
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Rango Salarial</label>
+                                    <select formControlName="rango_salarial_id"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                        <option [ngValue]="null">Selecciona...</option>
+                                        @for (cat of catalogos.rangoSalarial; track cat.id) { <option [value]="cat.id">
+                                            {{ cat.nombre }}</option> }
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Religión</label>
+                                    <select formControlName="religion_id"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-600">
+                                        <option [ngValue]="null">Selecciona...</option>
+                                        @for (cat of catalogos.religion; track cat.id) { <option [value]="cat.id">{{
+                                            cat.nombre }}</option> }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-slate-100 pt-6">
+                                <label class="block text-sm font-bold text-slate-800 mb-2">Sectores Sociales a los que
+                                    pertenece (Ctrl+Clic para múltiples)</label>
+                                <select multiple formControlName="sectores_sociales_ids"
+                                    class="w-full px-4 py-2 border border-slate-300 rounded-lg h-32 outline-none focus:ring-2 focus:ring-sky-600">
+                                    @for (cat of catalogos.sectoresSociales; track cat.id) { <option [value]="cat.id">{{
+                                        cat.nombre }}</option> }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div [class.hidden]="pestanaActual !== 5" class="space-y-6">
+                            <h2 class="text-xl font-bold text-slate-800 border-b pb-2 mb-6">5. Aspectos Psicosociales e
+                                Intereses</h2>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Adicciones
+                                        Detectadas</label>
+                                    <select multiple formControlName="adicciones_ids"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg h-32 outline-none focus:ring-2 focus:ring-sky-600 text-sm">
+                                        @for (cat of catalogos.adicciones; track cat.id) { <option [ngValue]="cat.id">{{
+                                            cat.nombre }}</option> }
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Antecedentes de
+                                        Violencia Infantil</label>
+                                    <select multiple formControlName="violencia_infantil_ids"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg h-32 outline-none focus:ring-2 focus:ring-sky-600 text-sm">
+                                        @for (cat of catalogos.tipoViolencia; track cat.id) { <option [value]="cat.id">
+                                            {{ cat.nombre }}</option> }
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Actividades
+                                        Recreativas</label>
+                                    <select multiple formControlName="actividades_recreativas_ids"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg h-32 outline-none focus:ring-2 focus:ring-sky-600 text-sm">
+                                        @for (cat of catalogos.actividadRecreativa; track cat.id) { <option
+                                            [value]="cat.id">{{ cat.nombre }}</option> }
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Géneros Músicales de
+                                        Interés</label>
+                                    <!-- 🛠️ CORREGIDO: Tenía actividades_recreativas_ids, lo cambié a generos_musicales_ids -->
+                                    <select multiple formControlName="generos_musicales_ids"
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg h-32 outline-none focus:ring-2 focus:ring-sky-600 text-sm">
+                                        @for (cat of catalogos.generoMusical; track cat.id) { <option [value]="cat.id">
+                                            {{ cat.nombre }}</option> }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 🚀 PESTAÑA 6 ACTUALIZADA CON TABLA Y BOTÓN -->
+                        <div [class.hidden]="pestanaActual !== 6" class="space-y-6">
+                            
+                            <div class="flex justify-between items-center border-b pb-2 mb-6">
+                                <h2 class="text-xl font-bold text-slate-800">6. Historial de Procesos de Reeducación</h2>
+                                
+                                @if (modoEdicion) {
+                                <button type="button" (click)="abrirModalProcesos($event)" 
+                                    class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                    Iniciar Nuevo Proceso
+                                </button>
+                                }
+                            </div>
+                           
+                            @if (!modoEdicion) {
+                            <div class="p-4 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg flex items-start">
+                                <svg class="w-5 h-5 mr-3 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <p>Debes guardar la información básica del agresor antes de poder asignarle un proceso de reeducación.</p>
+                            </div>
+                            } @else {
+                                
+                               
+                                <div class="overflow-x-auto bg-white border border-slate-200 rounded-lg">
+                                    <table class="w-full text-left text-sm text-slate-600">
+                                        <thead class="bg-slate-50 text-slate-700 border-b border-slate-200">
+                                            <tr>
+                                                <th class="px-4 py-3 font-bold">Fecha de Inicio</th>
+                                                <th class="px-4 py-3 font-bold">Denunciante</th>
+                                                <th class="px-4 py-3 font-bold">Carpeta Fiscalía</th>
+                                                <th class="px-4 py-3 font-bold">Estatus</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (proceso of agresorActual?.proceso_reeducacion; track proceso) {
+                                            <tr class="border-b border-slate-100 hover:bg-slate-50">
+                                                <td class="px-4 py-3 font-medium text-slate-800">{{ proceso.fecha_inicio }}</td>
+                                                <td class="px-4 py-3">{{ proceso.denunciante || 'N/A' }}</td>
+                                                <td class="px-4 py-3">{{ proceso.folio_carpeta_fiscalia || 'N/A' }}</td>
+                                               <td class="px-4 py-3 text-right space-x-3">
+                    <button type="button" (click)="abrirModalProcesos($event, proceso)" 
+                        class="text-sky-600 hover:text-sky-800 font-medium transition-colors" title="Editar">
+                        Editar
+                    </button>
+                   <!-- <button type="button" (click)="eliminarProceso($event, proceso)" 
+                        class="text-red-600 hover:text-red-800 font-medium transition-colors" title="Eliminar">
+                        Eliminar
+                    </button>-->
+                </td>
+                                            </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="absolute bottom-0 left-0 right-0 bg-slate-50 border-t border-slate-200 p-4 flex justify-between items-center">
+                        <button type="button" (click)="cancelarOperacion()"
+                            class="text-slate-600 hover:text-slate-900 font-medium px-4 py-2">
+                            Cancelar y volver
+                        </button>
+
+                        <div class="space-x-3 flex">
+                            @if (pestanaActual > 1) {
+                            <button type="button" (click)="cambiarPestana(pestanaActual - 1)"
+                                class="bg-white border border-slate-300 text-slate-700 px-5 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors">
+                                Atrás
+                            </button>
+                            }
+
+                            @if ((modoEdicion && pestanaActual < 6) || (!modoEdicion && pestanaActual < 5)) { <button
+                                type="button" (click)="cambiarPestana(pestanaActual + 1)"
+                                class="bg-slate-900 text-white px-5 py-2 rounded-lg font-medium hover:bg-slate-800 transition-colors">
+                                Siguiente
+                                </button>
+                                } @else {
+                                <button type="submit" [disabled]="formulario.invalid || cargando"
+                                    class="bg-sky-600 text-white px-6 py-2 rounded-lg font-bold shadow-sm hover:bg-sky-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                    {{ cargando ? 'Procesando...' : (modoEdicion ? 'Actualizar Expediente' : 'Finalizar
+                                    Registro') }}
+                                </button>
+                                }
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        }
+
+    </div>
+</div>
+
+<app-modal-notificacion [mostrar]="mostrarModal" [tipo]="modalConfig.tipo" [titulo]="modalConfig.titulo"
+    [mensaje]="modalConfig.mensaje" (cerrado)="cerrarMensaje()"
+    (confirmado)="ejecutarEliminacion()"></app-modal-notificacion>
+@if (mostrarModalProceso==true) {
+<app-procesos-modal 
+  [agresorId]="idEdicion || 0"
+  (cerrado)="mostrarModalProceso=false"
+  (guardado)="alGuardarProceso($event)">
+</app-procesos-modal>
+}

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth';
 import { ModalComponent } from '../../../shared/components/modal/modal';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -14,10 +15,11 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private cd = inject(ChangeDetectorRef);
+  private router = inject(Router)
 
   cargando = false;
   mostrarModal = false;
-  tipoModal: 'exito' | 'error' = 'error';
+  tipoModal: 'acceso_autorizado'|'exito' | 'error' = 'error';
   tituloModal = '';
   mensajeModal = '';
 
@@ -40,7 +42,7 @@ export class LoginComponent {
         this.cargando = false;
         
         // Configuramos el modal de éxito
-        this.tipoModal = 'exito';
+        this.tipoModal = 'acceso_autorizado';
         this.tituloModal = 'Acceso Autorizado';
         this.mensajeModal = 'Credenciales correctas. Ingresando al sistema...';
         this.mostrarModal = true;
@@ -49,6 +51,7 @@ export class LoginComponent {
         
         // Aquí redirigirás al dashboard
         console.log('¡Bienvenido! Redirigiendo...', respuesta);
+        //this.router.navigate(["/agresores"]);
       },
       error: (err) => {
         this.cargando = false;

@@ -75,7 +75,6 @@ class ProcesoReeducacionCreate(ProcesoReeducacionBase):
 
 class ProcesoReeducacionResponse(ProcesoReeducacionBase, AuditResponseMixin):
     folio: int
-
     agresor: Optional[AgresorLightResponse]=None
     motivo_ingreso: Optional[MotivoIngresoResponse]=None
     tipo_violencia: Optional[TipoViolenciaResponse]=None

@@ -139,13 +139,15 @@ export abstract class BaseCrudComponent<TItem, T> {
         return this.datosVista.filter(item => this.filtrarDato(item, busqueda));
     }
 
-    get datosPaginados(): TItem[] {
+   get datosPaginados(): TItem[] {
         const inicio = (this.paginaActual - 1) * this.elementosPorPagina;
-        return this.datosVista.slice(inicio, inicio + this.elementosPorPagina);
+        // Ahora corta la lista que ya pasó por los filtros
+        return this.datosFiltrados.slice(inicio, inicio + this.elementosPorPagina);
     }
 
     get totalPaginas(): number {
-        return Math.ceil(this.datosVista.length / this.elementosPorPagina) || 1;
+        // Ahora calcula el total de páginas basándose en los resultados encontrados
+        return Math.ceil(this.datosFiltrados.length / this.elementosPorPagina) || 1;
     }
 
     cambiarPagina(nuevaPagina: number) {

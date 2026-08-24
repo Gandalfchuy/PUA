@@ -24,6 +24,7 @@ export class ListasComponent extends BaseCrudComponent<ListaItem, Lista> impleme
   private platformId = inject(PLATFORM_ID);
 
   servicio = inject(ListasService);
+  filtrosActivos: any = { curp: '', tema: '', grupo: '', fecha: '' };
   
   private agresorService = inject(AgresoresService);
   private sesionService = inject(SesionesService);
@@ -89,17 +90,39 @@ export class ListasComponent extends BaseCrudComponent<ListaItem, Lista> impleme
     return item.id; 
   }
 
-  limpiarFiltros() {
-    this.filtrosForm.reset();
-    this.cargarDatos();
-  }
-
   get agresoresFiltrados() {
     const termino = this.textoBusqueda.toLowerCase();
     return this.agresores.filter(a => 
       a.curp.toLowerCase().includes(termino) || 
       (a.nombre && a.nombre.toLowerCase().includes(termino))
     );
+  }
+
+ aplicarFiltros() {
+    this.filtrosActivos = this.filtrosForm.value;
+    this.paginaActual = 1;
+  }
+
+  // 3. Limpiar filtros ahora resetea ambos estados
+  limpiarFiltros() {
+    this.filtrosForm.reset({ curp: '', tema: '', grupo: '', fecha: '' });
+    this.filtrosActivos = { curp: '', tema: '', grupo: '', fecha: '' };
+    this.paginaActual = 1; 
+  }
+
+  // 4. Sobrescribimos el comportamiento del BaseCrudComponent
+  override get datosFiltrados(): ListaItem[] {
+    return this.datosVista.filter(item => {
+      const form = this.filtrosActivos;
+
+      // Comparamos los valores seleccionados con las propiedades anidadas de tu ListaItem
+      const coincideCurp = !form.curp || item.agresor?.folio?.toString() === form.curp?.toString();
+      const coincideTema = !form.tema || item.sesion?.folio?.toString() === form.tema?.toString();
+      const coincideGrupo = !form.grupo || item.grupo?.folio?.toString() === form.grupo?.toString();
+      const coincideFecha = !form.fecha || item.fecha === form.fecha;
+
+      return coincideCurp && coincideTema && coincideGrupo && coincideFecha;
+    });
   }
 
   seleccionarAgresor(agresor: any) {

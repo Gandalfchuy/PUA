@@ -1,1 +1,14 @@
-/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+/* Definición de la paleta institucional */
+@theme {
+  --color-pua-oscuro: #0f172a;      /* Para textos principales y sidebar */
+  --color-pua-primario: #0284c7;    /* Azul institucional para botones y acciones */
+  --color-pua-secundario: #f1f5f9;  /* Fondos generales y separación */
+  --color-pua-alerta: #ef4444;      /* Para eliminar registros o marcar inasistencias */
+}
+
+/* Estilos globales básicos */
+body {
+  @apply bg-pua-secundario text-pua-oscuro antialiased;
+}

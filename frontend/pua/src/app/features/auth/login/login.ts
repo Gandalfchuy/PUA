@@ -41,7 +41,6 @@ export class LoginComponent {
       next: (respuesta) => {
         this.cargando = false;
         
-        // Configuramos el modal de éxito
         this.tipoModal = 'acceso_autorizado';
         this.tituloModal = 'Acceso Autorizado';
         this.mensajeModal = 'Credenciales correctas. Ingresando al sistema...';
@@ -49,18 +48,17 @@ export class LoginComponent {
         
         this.cd.markForCheck();
         
-        // Aquí redirigirás al dashboard
-        console.log('¡Bienvenido! Redirigiendo...', respuesta);
-        //this.router.navigate(["/agresores"]);
+        setTimeout(() => {
+          this.mostrarModal = false;
+          this.router.navigate(['/agresores']);
+        }, 1000);
       },
       error: (err) => {
         this.cargando = false;
         
-        // Configuramos el modal de error
         this.tipoModal = 'error';
         this.tituloModal = 'Error de Autenticación';
         
-        // Si FastAPI devuelve un error 401 o 400
         if (err.status === 401 || err.status === 400) {
           this.mensajeModal = 'El correo institucional o la contraseña son incorrectos.';
         } else {
@@ -76,6 +74,9 @@ export class LoginComponent {
 
   cerrarModal() {
     this.mostrarModal = false;
+    if (this.tipoModal === 'acceso_autorizado') {
+      this.router.navigate(['/agresores']);
+    }
     this.cd.markForCheck();
   }
 }

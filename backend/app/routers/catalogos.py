@@ -140,14 +140,6 @@ router_situacion_laboral = crear_router_catalogo(
     etiqueta="Catálogos - Situación Laboral"
 )
 
-router_situacion_academica = crear_router_catalogo(
-    modelo_db=SituacionAcademica,
-    schema_entrada=SituacionAcademicaCreate,
-    schema_salida=SituacionAcademicaResponse,
-    prefijo="/catalogos/situacion-academica",
-    etiqueta="Catálogos - Situación Académica"
-)
-
 router_situacion_vivienda = crear_router_catalogo(
     modelo_db=SituacionVivienda,
     schema_entrada=SituacionViviendaCreate,

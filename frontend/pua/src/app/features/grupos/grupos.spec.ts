@@ -1,19 +1,26 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ɵresolveComponentResources as resolveComponentResources } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { GruposComponent } from './grupos';
 
-import { Grupos } from './grupos';
-
-describe('Grupos', () => {
-  let component: Grupos;
-  let fixture: ComponentFixture<Grupos>;
+describe('GruposComponent', () => {
+  let component: GruposComponent;
+  let fixture: ComponentFixture<GruposComponent>;
 
   beforeEach(async () => {
+    await resolveComponentResources(() => Promise.resolve('<div></div>'));
     await TestBed.configureTestingModule({
-      imports: [Grupos],
+      imports: [GruposComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Grupos);
+    fixture = TestBed.createComponent(GruposComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
   });
 
   it('should create', () => {

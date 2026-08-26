@@ -59,7 +59,7 @@ def crear_router_catalogo(
         usuario_actual = Depends(obtener_usuario_actual)
     ):
         registro_db = db.query(modelo_db).filter(modelo_db.id == id).first()
-        if not registro_db:
+        if not registro_db or (hasattr(registro_db, "is_deleted") and registro_db.is_deleted):
             raise HTTPException(status_code=404, detail="Registro no encontrado")
         return registro_db
 
@@ -71,7 +71,7 @@ def crear_router_catalogo(
         usuario_actual = Depends(obtener_usuario_actual)
     ): # type: ignore
         registro_db = db.query(modelo_db).filter(modelo_db.id == id).first()
-        if not registro_db:
+        if not registro_db or (hasattr(registro_db, "is_deleted") and registro_db.is_deleted):
             raise HTTPException(status_code=404, detail="Registro no encontrado")
         
         if hasattr(registro_db, 'updated_by'):
@@ -98,7 +98,9 @@ def crear_router_catalogo(
         if not registro_db:
             raise HTTPException(status_code=404, detail="Registro no encontrado")
         
-        # Corrección aplicada a las asignaciones de campos
+        if getattr(registro_db, "is_deleted", False):
+            raise HTTPException(status_code=400, detail="El registro ya ha sido eliminado previamente")
+        
         if hasattr(registro_db, "deleted_by"):
             registro_db.deleted_by = usuario_admin.id
 
@@ -107,7 +109,11 @@ def crear_router_catalogo(
         
         if hasattr(registro_db, "is_deleted"):
             registro_db.is_deleted = True
-            db.commit()
+
+        if hasattr(registro_db, "activo"):
+            registro_db.activo = False
+            
+        db.commit()
             
         return None
 

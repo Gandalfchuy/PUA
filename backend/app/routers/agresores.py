@@ -6,6 +6,7 @@ from typing import List
 from app.database import get_db
 from app.models.agresores import Agresor
 from app.models.catalogos import Adiccion, TipoViolencia, SectorSocial, ActividadRecreativa, GeneroMusical, TipoRelacion
+from app.models.usuarios import Usuarios
 from app.schemas.agresores import AgresorCreate, AgresorResponse
 from app.core.usuario import obtener_usuario_actual, VerificadorRol
 
@@ -14,7 +15,7 @@ requiere_admin = VerificadorRol(["SUPER_ADMIN"])
 router_agresor = APIRouter(prefix="/agresores", tags=["Agresores"])
 
 @router_agresor.post("/", response_model=AgresorResponse, status_code=status.HTTP_201_CREATED)
-def crear_agresor(datos: AgresorCreate, db: Session = Depends(get_db), usuario_id: int = Depends(obtener_usuario_actual)):
+def crear_agresor(datos: AgresorCreate, db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)):
 
     if datos.curp:
         agresor_duplicado = db.query(Agresor).filter(Agresor.curp == datos.curp).first()
@@ -87,7 +88,7 @@ def crear_agresor(datos: AgresorCreate, db: Session = Depends(get_db), usuario_i
         violencia_db = db.query(TipoViolencia).filter(TipoViolencia.id.in_(datos.violencia_infantil)).all()
         nuevo_agresor.violencia_infantil = violencia_db
 
-    nuevo_agresor.created_by = usuario_id.id
+    nuevo_agresor.created_by = usuario_actual.id
     nuevo_agresor.created_at = datetime.now()
 
     db.add(nuevo_agresor)
@@ -98,17 +99,17 @@ def crear_agresor(datos: AgresorCreate, db: Session = Depends(get_db), usuario_i
 
 
 @router_agresor.get("/{folio}", response_model=AgresorResponse)
-def obtener_agresor(folio: int, db: Session = Depends(get_db), usuario_id: int = Depends(obtener_usuario_actual)):
-    agresor_db = db.query(Agresor).filter(Agresor.folio == folio).first()
+def obtener_agresor(folio: int, db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)):
+    agresor_db = db.query(Agresor).filter(Agresor.folio == folio, Agresor.is_deleted == False).first()
     
-    if not agresor_db or agresor_db.is_deleted==True:
+    if not agresor_db:
         raise HTTPException(status_code=404, detail="Agresor no encontrado")
         
     return agresor_db
 
 
 @router_agresor.get("/", response_model=List[AgresorResponse])
-def obtener_agresores(db: Session = Depends(get_db), usuario_id: int = Depends(obtener_usuario_actual)):
+def obtener_agresores(db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)):
     agresores_db = db.query(Agresor).filter(Agresor.is_deleted == False).all()
     
     return agresores_db
@@ -116,8 +117,8 @@ def obtener_agresores(db: Session = Depends(get_db), usuario_id: int = Depends(o
 
 
 @router_agresor.put("/{folio}", response_model=AgresorResponse)
-def actualizar_agresor(folio: int, datos: AgresorCreate, db: Session = Depends(get_db), usuario_id: int = Depends(obtener_usuario_actual)):
-    agresor_db = db.query(Agresor).filter(Agresor.folio == folio, Agresor.is_deleted==False).first()
+def actualizar_agresor(folio: int, datos: AgresorCreate, db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)):
+    agresor_db = db.query(Agresor).filter(Agresor.folio == folio, Agresor.is_deleted == False).first()
     if not agresor_db:
         raise HTTPException(status_code=404, detail="Agresor no encontrado")
         
@@ -184,9 +185,8 @@ def actualizar_agresor(folio: int, datos: AgresorCreate, db: Session = Depends(g
         violencia_db = db.query(TipoViolencia).filter(TipoViolencia.id.in_(datos.violencia_infantil)).all()
         agresor_db.violencia_infantil = violencia_db
 
-    agresor_db.updated_by = usuario_id.id
+    agresor_db.updated_by = usuario_actual.id
     agresor_db.updated_at = datetime.now()
-
 
     db.commit()
     db.refresh(agresor_db)
@@ -194,19 +194,18 @@ def actualizar_agresor(folio: int, datos: AgresorCreate, db: Session = Depends(g
     return agresor_db
 
 @router_agresor.delete("/{folio}", status_code=status.HTTP_204_NO_CONTENT)
-def borrar_agresor(folio: int, db: Session = Depends(get_db),usuario_id: int = Depends(requiere_admin)):
+def borrar_agresor(folio: int, db: Session = Depends(get_db), usuario_admin: Usuarios = Depends(requiere_admin)):
 
     agresor_db = db.query(Agresor).filter(Agresor.folio == folio).first()
     
     if not agresor_db:
         raise HTTPException(status_code=404, detail="Agresor no encontrado")
         
-    if not agresor_db.is_deleted:
-        raise HTTPException(status_code=400, detail="Agresor eliminado")
+    if agresor_db.is_deleted:
+        raise HTTPException(status_code=400, detail="El agresor ya ha sido eliminado previamente")
 
     agresor_db.is_deleted = True
-    
-    agresor_db.deleted_by = usuario_id.id 
+    agresor_db.deleted_by = usuario_admin.id 
     agresor_db.deleted_at = datetime.now()
     
     db.commit()

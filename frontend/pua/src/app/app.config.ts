@@ -8,7 +8,6 @@ import { authInterceptor } from './core/guards/auth-interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withFetch(), withInterceptors([])),
-    provideHttpClient(withInterceptors([authInterceptor])) 
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor]))
   ]
 };

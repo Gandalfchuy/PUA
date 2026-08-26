@@ -1,44 +1,46 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
   
-  // Ajusta este puerto al que usa tu servidor de FastAPI
-  private apiUrl = 'http://localhost:8000'; 
+  private apiUrl = environment.apiUrl; 
 
   login(correo: string, contrasena: string): Observable<any> {
-    // 1. Transformamos los datos al formato que exige FastAPI (x-www-form-urlencoded)
     const body = new HttpParams()
-      .set('username', correo) // FastAPI exige la llave 'username'
+      .set('username', correo)
       .set('password', contrasena);
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    // 2. Hacemos el POST a tu endpoint real
     return this.http.post(`${this.apiUrl}/login`, body.toString(), { headers }).pipe(
       tap((respuesta: any) => {
-        // 3. Interceptamos la respuesta exitosa para guardar el Token JWT
-        if (respuesta && respuesta.access_token) {
+        if (respuesta && respuesta.access_token && isPlatformBrowser(this.platformId)) {
           localStorage.setItem('pua_token', respuesta.access_token);
-          console.log('Token guardado exitosamente');
         }
       })
     );
   }
 
-  // Método auxiliar para saber si hay sesión activa
   estaLogueado(): boolean {
-    return !!localStorage.getItem('pua_token');
+    if (isPlatformBrowser(this.platformId)) {
+      return !!localStorage.getItem('pua_token');
+    }
+    return false;
   }
 
   cerrarSesion(): void {
-    localStorage.removeItem('pua_token');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('pua_token');
+    }
   }
 }

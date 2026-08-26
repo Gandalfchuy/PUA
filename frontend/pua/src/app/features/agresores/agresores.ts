@@ -155,14 +155,15 @@ override guardar(): void {
       violencia_infantil: (val.violencia_infantil_ids || []).map(Number)
     };
 
-    const urlApi = 'http://localhost:8000/agresores'; 
-    
-    const peticion$ = this.modoEdicion 
-      ? this.http.put(`${urlApi}/${this.idEdicion}`, payload)
-      : this.http.post(urlApi, payload);
+    const peticion$ = this.modoEdicion && this.idEdicion !== null
+      ? this.servicio.actualizar(this.idEdicion, payload as any)
+      : this.servicio.crear(payload as any);
 
     peticion$.subscribe({
-     next: () => this.exitoAlGuardar('Actualización exitosa', 'Registro actualizado correctamente.'),
+     next: () => this.exitoAlGuardar(
+       this.modoEdicion ? 'Actualización exitosa' : 'Registro exitoso',
+       this.modoEdicion ? 'Registro actualizado correctamente.' : 'Registro guardado correctamente.'
+     ),
      error: (err) => this.errorAlGuardar(err)
     });
   }

@@ -12,7 +12,7 @@ requiere_admin = VerificadorRol(["SUPER_ADMIN"])
 
 router_lista = APIRouter(prefix="/lista", tags=["Listas"])
 
-@router_lista.post("/", response_model=ListaResponse, status_code=status.HTTP_201_CREATED)
+@router_lista.post("", response_model=ListaResponse, status_code=status.HTTP_201_CREATED)
 def crear_asistencia(datos: ListaCreate, db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)):
 
     nueva_asistencia = Lista(**datos.model_dump())
@@ -25,7 +25,7 @@ def crear_asistencia(datos: ListaCreate, db: Session = Depends(get_db), usuario_
 
     return nueva_asistencia
 
-@router_lista.get("/", response_model=List[ListaResponse])
+@router_lista.get("", response_model=List[ListaResponse])
 def listar_asistencias(db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)):
     listas_db = db.query(Lista).filter(Lista.is_deleted == False).all()
     return listas_db

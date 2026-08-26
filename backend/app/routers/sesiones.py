@@ -12,7 +12,7 @@ requiere_admin = VerificadorRol(["SUPER_ADMIN"])
 
 router_sesion = APIRouter(prefix="/sesiones", tags=["Sesiones"])
 
-@router_sesion.post("/", response_model=SesionResponse, status_code=status.HTTP_201_CREATED)
+@router_sesion.post("", response_model=SesionResponse, status_code=status.HTTP_201_CREATED)
 def crear_sesion(datos: SesionCreate, db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)): 
 
     nueva_sesion = Sesion(**datos.model_dump())
@@ -25,7 +25,7 @@ def crear_sesion(datos: SesionCreate, db: Session = Depends(get_db), usuario_act
 
     return nueva_sesion
 
-@router_sesion.get("/", response_model=List[SesionResponse])
+@router_sesion.get("", response_model=List[SesionResponse])
 def listar_sesiones(db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)):
     sesiones_db = db.query(Sesion).filter(Sesion.is_deleted == False).all()
     return sesiones_db

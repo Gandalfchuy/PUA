@@ -12,7 +12,7 @@ requiere_admin = VerificadorRol(["SUPER_ADMIN"])
 
 router_proceso = APIRouter(prefix="/proceso-reeducacion", tags=["Procesos de Reeducacion"])
 
-@router_proceso.post("/", response_model=ProcesoReeducacionResponse, status_code=status.HTTP_201_CREATED)
+@router_proceso.post("", response_model=ProcesoReeducacionResponse, status_code=status.HTTP_201_CREATED)
 def crear_proceso(datos: ProcesoReeducacionCreate, db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)):
     
     nuevo_proceso = ProcesoReeducacion(**datos.model_dump())
@@ -24,7 +24,7 @@ def crear_proceso(datos: ProcesoReeducacionCreate, db: Session = Depends(get_db)
 
     return nuevo_proceso
 
-@router_proceso.get("/", response_model=List[ProcesoReeducacionResponse])
+@router_proceso.get("", response_model=List[ProcesoReeducacionResponse])
 def obtener_procesos(db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)):
     procesos_db = db.query(ProcesoReeducacion).filter(ProcesoReeducacion.is_deleted == False).all()
     return procesos_db

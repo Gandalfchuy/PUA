@@ -22,7 +22,7 @@ def crear_router_catalogo(
     
     router = APIRouter(prefix=prefijo, tags=[etiqueta])
 
-    @router.post("/", response_model=schema_salida, status_code=status.HTTP_201_CREATED)
+    @router.post("", response_model=schema_salida, status_code=status.HTTP_201_CREATED)
     def crear(
         datos: schema_entrada, #type:ignore
         db: Session = Depends(get_db), 
@@ -41,7 +41,7 @@ def crear_router_catalogo(
         db.refresh(nuevo_registro)
         return nuevo_registro
 
-    @router.get("/", response_model=List[schema_salida])
+    @router.get("", response_model=List[schema_salida])
     def obtener_todos(
         incluir_inactivos: bool = False, 
         db: Session = Depends(get_db), 

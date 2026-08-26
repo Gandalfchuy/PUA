@@ -14,7 +14,7 @@ requiere_admin = VerificadorRol(["SUPER_ADMIN"])
 
 router_agresor = APIRouter(prefix="/agresores", tags=["Agresores"])
 
-@router_agresor.post("/", response_model=AgresorResponse, status_code=status.HTTP_201_CREATED)
+@router_agresor.post("", response_model=AgresorResponse, status_code=status.HTTP_201_CREATED)
 def crear_agresor(datos: AgresorCreate, db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)):
 
     if datos.curp:
@@ -108,7 +108,7 @@ def obtener_agresor(folio: int, db: Session = Depends(get_db), usuario_actual: U
     return agresor_db
 
 
-@router_agresor.get("/", response_model=List[AgresorResponse])
+@router_agresor.get("", response_model=List[AgresorResponse])
 def obtener_agresores(db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)):
     agresores_db = db.query(Agresor).filter(Agresor.is_deleted == False).all()
     

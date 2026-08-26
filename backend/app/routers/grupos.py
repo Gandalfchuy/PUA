@@ -13,7 +13,7 @@ requiere_admin = VerificadorRol(["SUPER_ADMIN"])
 
 router_grupo = APIRouter(prefix="/grupos", tags=["Grupos"])
 
-@router_grupo.post("/", response_model=GrupoResponse, status_code=status.HTTP_201_CREATED)
+@router_grupo.post("", response_model=GrupoResponse, status_code=status.HTTP_201_CREATED)
 def crear_grupo(datos: GrupoCreate, db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)): 
 
     nuevo_grupo = Grupo(**datos.model_dump(exclude={"ubicacion"}))
@@ -32,7 +32,7 @@ def crear_grupo(datos: GrupoCreate, db: Session = Depends(get_db), usuario_actua
 
     return nuevo_grupo
 
-@router_grupo.get("/", response_model=List[GrupoResponse])
+@router_grupo.get("", response_model=List[GrupoResponse])
 def listar_grupos(db: Session = Depends(get_db), usuario_actual: Usuarios = Depends(obtener_usuario_actual)):
     grupos_db = db.query(Grupo).filter(Grupo.is_deleted == False).all()
     return grupos_db

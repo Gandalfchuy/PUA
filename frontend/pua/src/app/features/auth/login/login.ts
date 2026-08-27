@@ -50,7 +50,7 @@ export class LoginComponent {
         
         setTimeout(() => {
           this.mostrarModal = false;
-          this.router.navigate(['/agresores']);
+          this.router.navigate(['/dashboard']);
         }, 1000);
       },
       error: (err) => {

@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs'; // 👈 Para llamadas en paralelo
 import { AgresorItem, Agresor, ProcesoReeducacionItem } from '../../core/models/pua.models';
 import { AgresoresService } from '../../core/services/agresores';
@@ -23,7 +24,8 @@ export class AgresoresComponent extends BaseCrudComponent<AgresorItem, Agresor> 
   private fb = inject(FormBuilder);
   private platformId = inject(PLATFORM_ID);
   private catalogosService = inject(CatalogosService);
-  private http = inject(HttpClient)
+  private http = inject(HttpClient);
+  private route = inject(ActivatedRoute);
 
   servicio = inject(AgresoresService);
   procesoSeleccionado: any = null;
@@ -33,6 +35,41 @@ export class AgresoresComponent extends BaseCrudComponent<AgresorItem, Agresor> 
   pestanaActual = 1; // 1 a 5
   mostrarModalProceso = false;
   agresorActual: AgresorItem | null = null;
+
+  filtrosForm = this.fb.group({
+    curp: [''],
+    nombre: ['']
+  });
+
+  filtrosActivos: { curp: string; nombre: string } = { curp: '', nombre: '' };
+
+  aplicarFiltros() {
+    this.filtrosActivos = {
+      curp: this.filtrosForm.value.curp?.trim() || '',
+      nombre: this.filtrosForm.value.nombre?.trim() || ''
+    };
+    this.paginaActual = 1;
+  }
+
+  limpiarFiltros() {
+    this.filtrosForm.reset({ curp: '', nombre: '' });
+    this.filtrosActivos = { curp: '', nombre: '' };
+    this.paginaActual = 1;
+  }
+
+  override get datosFiltrados(): AgresorItem[] {
+    return this.datosVista.filter(item => {
+      const curpBuscada = this.filtrosActivos.curp.toLowerCase();
+      const nombreBuscado = this.filtrosActivos.nombre.toLowerCase();
+
+      const coincideCurp = !curpBuscada || (item.curp && item.curp.toLowerCase().includes(curpBuscada));
+      
+      const nombreCompleto = `${item.nombre || ''} ${item.apellido_paterno || ''} ${item.apellido_materno || ''}`.toLowerCase();
+      const coincideNombre = !nombreBuscado || nombreCompleto.includes(nombreBuscado);
+
+      return coincideCurp && coincideNombre;
+    });
+  }
 
   catalogos: any = {
     estadoCivil: [], situacionAcademica: [], situacionLaboral: [], situacionVivienda: [],
@@ -82,6 +119,63 @@ export class AgresoresComponent extends BaseCrudComponent<AgresorItem, Agresor> 
     if (isPlatformBrowser(this.platformId)) {
       this.cargarDatos();
       this.cargarCatalogos();
+      this.verificarParametrosRuta();
+    }
+  }
+
+  verificarParametrosRuta() {
+    this.route.queryParams.subscribe(params => {
+      const folio = params['folio'] ? Number(params['folio']) : (params['id'] ? Number(params['id']) : null);
+      const curp = params['curp'] ? String(params['curp']).trim() : null;
+
+      if (folio || curp) {
+        if (curp) {
+          this.filtrosForm.patchValue({ curp });
+          this.filtrosActivos.curp = curp;
+        }
+
+        // Si los datos ya se encuentran en memoria
+        if (this.datosVista && this.datosVista.length > 0) {
+          const agresor = this.datosVista.find(a => 
+            (folio && a.folio === folio) || 
+            (curp && a.curp?.toLowerCase() === curp.toLowerCase())
+          );
+          if (agresor) {
+            this.editar(agresor);
+            return;
+          }
+        }
+
+        // Si los datos aún no llegan por red o se busca por ID puntual
+        if (folio) {
+          this.servicio.obtenerPorId(folio).subscribe({
+            next: (agresorApi) => {
+              if (agresorApi) {
+                this.editar(agresorApi);
+              }
+            },
+            error: (e) => console.warn('No se pudo abrir el expediente del agresor:', e)
+          });
+        }
+      }
+    });
+  }
+
+  override despuesDeGuardar(): void {}
+
+  protected override despuesDeCargarDatos(): void {
+    const params = this.route.snapshot.queryParams;
+    const folio = params['folio'] ? Number(params['folio']) : (params['id'] ? Number(params['id']) : null);
+    const curp = params['curp'] ? String(params['curp']).trim() : null;
+
+    if ((folio || curp) && !this.mostrandoFormulario) {
+      const agresor = this.datosVista.find(a => 
+        (folio && a.folio === folio) || 
+        (curp && a.curp?.toLowerCase() === curp.toLowerCase())
+      );
+      if (agresor) {
+        this.editar(agresor);
+      }
     }
   }
 

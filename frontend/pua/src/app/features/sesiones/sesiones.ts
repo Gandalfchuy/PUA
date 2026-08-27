@@ -25,6 +25,32 @@ export class SesionesComponent extends BaseCrudComponent<SesionItem, Sesion> imp
     objetivo: ['', [Validators.required, Validators.minLength(5)]]
   });
 
+  filtrosForm = this.fb.group({
+    nombre: ['']
+  });
+
+  filtrosActivos: { nombre: string } = { nombre: '' };
+
+  aplicarFiltros() {
+    this.filtrosActivos = {
+      nombre: this.filtrosForm.value.nombre?.trim() || ''
+    };
+    this.paginaActual = 1;
+  }
+
+  limpiarFiltros() {
+    this.filtrosForm.reset({ nombre: '' });
+    this.filtrosActivos = { nombre: '' };
+    this.paginaActual = 1;
+  }
+
+  override get datosFiltrados(): SesionItem[] {
+    return this.datosVista.filter(item => {
+      const nombreBuscado = this.filtrosActivos.nombre.toLowerCase();
+      return !nombreBuscado || (item.nombre && item.nombre.toLowerCase().includes(nombreBuscado));
+    });
+  }
+
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.cargarDatos();

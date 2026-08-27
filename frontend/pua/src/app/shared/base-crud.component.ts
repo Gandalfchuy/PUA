@@ -43,6 +43,7 @@ export abstract class BaseCrudComponent<TItem, T> {
         return payload;
     }
     protected despuesDeGuardar(): void { }
+    protected despuesDeCargarDatos(): void { }
 
     protected despuesDeParcharEdicion(item: TItem): void { }
 
@@ -54,6 +55,7 @@ export abstract class BaseCrudComponent<TItem, T> {
                 this.datosVista = datos;
                 this.paginaActual = 1;
                 this.cargando = false;
+                this.despuesDeCargarDatos();
                 this.cd.markForCheck();
             },
             error: (err) => {

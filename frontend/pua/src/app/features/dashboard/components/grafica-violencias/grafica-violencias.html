@@ -1,0 +1,48 @@
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col h-full">
+  <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+    <div>
+      <h3 class="text-base font-bold text-slate-900">Tipos de Violencia</h3>
+      <p class="text-xs text-slate-500 mt-0.5">Prevalencia en carpetas de investigación judicial</p>
+    </div>
+    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700">Fiscalía</span>
+  </div>
+
+  @if (cargando) {
+    <div class="space-y-4 py-4">
+      <div class="h-4 bg-slate-200 animate-pulse rounded w-3/4"></div>
+      <div class="h-3 bg-slate-100 animate-pulse rounded w-full"></div>
+      <div class="h-4 bg-slate-200 animate-pulse rounded w-2/3"></div>
+      <div class="h-3 bg-slate-100 animate-pulse rounded w-full"></div>
+      <div class="h-4 bg-slate-200 animate-pulse rounded w-1/2"></div>
+      <div class="h-3 bg-slate-100 animate-pulse rounded w-full"></div>
+    </div>
+  } @else if (tiposViolencia.length === 0) {
+    <div class="flex-1 flex flex-col items-center justify-center py-10 text-center">
+      <svg class="h-10 w-10 text-slate-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <p class="text-xs font-medium text-slate-500">Sin datos de tipología registrados</p>
+    </div>
+  } @else {
+    <div class="space-y-4 flex-1 overflow-y-auto pr-1">
+      @for (item of tiposViolencia; track item.tipo; let i = $index) {
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs font-medium">
+            <span class="text-slate-700 truncate pr-2" [title]="item.tipo">{{ item.tipo }}</span>
+            <div class="flex items-center space-x-2 shrink-0">
+              <span class="text-slate-900 font-bold">{{ item.total }} casos</span>
+              <span class="text-slate-400 font-mono text-[11px]">({{ item.porcentaje }}%)</span>
+            </div>
+          </div>
+          <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+            <div 
+              class="h-full rounded-full transition-all duration-500 ease-out" 
+              [ngClass]="getColor(i)"
+              [style.width.%]="item.porcentaje">
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

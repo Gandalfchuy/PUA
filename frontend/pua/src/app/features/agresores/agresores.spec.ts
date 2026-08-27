@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ɵresolveComponentResources as resolveComponentResources } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 import { AgresoresComponent } from './agresores';
 
 describe('AgresoresComponent', () => {
@@ -15,7 +16,8 @@ describe('AgresoresComponent', () => {
       imports: [AgresoresComponent],
       providers: [
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideRouter([])
       ]
     }).compileComponents();
 

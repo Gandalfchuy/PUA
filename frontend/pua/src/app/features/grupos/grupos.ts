@@ -27,6 +27,25 @@ export class GruposComponent extends BaseCrudComponent<GrupoItem, Grupo> impleme
     latitud: ['', [Validators.required, Validators.min(-90), Validators.max(90)]],
   });
 
+  filtrosForm = this.fb.group({
+    nombre: ['']
+  });
+
+  filtrosActivos: { nombre: string } = { nombre: '' };
+
+  aplicarFiltros() {
+    this.filtrosActivos = {
+      nombre: this.filtrosForm.value.nombre?.trim() || ''
+    };
+    this.paginaActual = 1;
+  }
+
+  limpiarFiltros() {
+    this.filtrosForm.reset({ nombre: '' });
+    this.filtrosActivos = { nombre: '' };
+    this.paginaActual = 1;
+  }
+
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.cargarDatos();
@@ -54,6 +73,13 @@ export class GruposComponent extends BaseCrudComponent<GrupoItem, Grupo> impleme
 
   getId(item: GrupoItem): number {
     return item.folio;
+  }
+
+  override get datosFiltrados(): GrupoItem[] {
+    return this.datosVista.filter(item => {
+      const nombreBuscado = this.filtrosActivos.nombre.toLowerCase();
+      return !nombreBuscado || (item.lugar && item.lugar.toLowerCase().includes(nombreBuscado));
+    });
   }
 
   obtenerUbicacionActual() {

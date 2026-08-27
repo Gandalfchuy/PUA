@@ -1,0 +1,17 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.custom-sede-pin {
+  background: transparent;
+  border: none;
+}
+
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 380px !important;
+  border-radius: 0.75rem;
+  z-index: 1;
+}

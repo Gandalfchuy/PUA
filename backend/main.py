@@ -26,12 +26,14 @@ from app.routers.grupos import router_grupo
 from app.routers.auth import router_auth
 from app.routers.listas import router_lista
 from app.routers.sesiones import router_sesion
+from app.routers.dashboard import router_dashboard
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="API PUA")
 
 app.include_router(router_auth)
+app.include_router(router_dashboard)
 app.include_router(router_lista)
 app.include_router(router_sesion)
 app.include_router(router_proceso)

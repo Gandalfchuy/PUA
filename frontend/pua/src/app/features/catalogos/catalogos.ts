@@ -5,13 +5,12 @@ import { CatalogosService } from '../../core/services/catalogos';
 import { CatalogoItem, Catalogo } from '../../core/models/pua.models';
 import { ModalNotificacion } from '../../shared/components/modal-notificacion/modal-notificacion';
 import { BaseCrudComponent } from '../../shared/base-crud.component';
-// Si ya implementaste la paginación, descomenta la siguiente línea:
-// import { PaginacionComponent } from '../../shared/components/paginacion/paginacion';
+import { PaginacionComponent } from '../../shared/components/paginacion/paginacion';
 
 @Component({
   selector: 'app-catalogos',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ModalNotificacion /*, PaginacionComponent */],
+  imports: [CommonModule, ReactiveFormsModule, ModalNotificacion, PaginacionComponent],
   templateUrl: './catalogos.html'
 })
 export class CatalogosComponent extends BaseCrudComponent<CatalogoItem, Catalogo> implements OnInit {
@@ -71,6 +70,10 @@ export class CatalogosComponent extends BaseCrudComponent<CatalogoItem, Catalogo
 
   getId(item: CatalogoItem): number {
     return item.id!;
+  }
+
+  override filtrarDato(item: CatalogoItem, busqueda: string): boolean {
+    return item.nombre.toLowerCase().includes(busqueda) || String(item.id).includes(busqueda);
   }
 
 }

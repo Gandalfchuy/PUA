@@ -81,7 +81,8 @@ export class MapaCalorComponent implements OnInit, AfterViewInit, OnDestroy {
 
     try {
       if (!this.L) {
-        this.L = await import('leaflet');
+        const leafletModule: any = await import('leaflet');
+        this.L = leafletModule.default?.map ? leafletModule.default : (leafletModule.map ? leafletModule : (leafletModule.default || leafletModule));
         (window as any).L = this.L;
 
         try {
